@@ -11,7 +11,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/database/seed.ts"
   },
   "dependencies": {
     "@radar-quito/types": "workspace:*",
@@ -34,6 +39,7 @@
     "@types/node": "^22.15.3",
     "@types/pg": "^8.11.14",
     "drizzle-kit": "^0.31.1",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "ts-node": "^10.9.2",
     "vitest": "^3.2.1"
