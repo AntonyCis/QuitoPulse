@@ -256,3 +256,18 @@ INSERT INTO categories (name, label, color, icon, sort_order) VALUES
   ('URBAN_PROBLEM', 'Problema Urbano', '#8D99AE', 'urban-problem', 6),
   ('OTHER', 'Otro', '#ADB5BD', 'other', 7)
 ON CONFLICT (name) DO NOTHING;
+
+-- ============================================
+-- PUSH SUBSCRIPTIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_endpoint ON push_subscriptions(endpoint);

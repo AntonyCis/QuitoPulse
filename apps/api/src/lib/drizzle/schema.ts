@@ -330,3 +330,22 @@ export const refreshTokens = pgTable(
     index('idx_refresh_tokens_expires').on(table.expiresAt),
   ],
 );
+
+// --- Push Subscriptions ---
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_push_subscriptions_user').on(table.userId),
+    index('idx_push_subscriptions_endpoint').on(table.endpoint),
+  ],
+);

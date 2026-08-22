@@ -11,12 +11,14 @@ import {
 } from '../../lib/drizzle/schema';
 import * as schema from '../../lib/drizzle/schema';
 import { eq, desc, sql, count, and } from 'drizzle-orm';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly db: NodePgDatabase<typeof schema>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getStats() {
@@ -205,6 +207,36 @@ export class AdminService {
       previousStatus,
       newStatus,
     });
+
+    // Send notification to report creator
+    const statusLabels: Record<string, string> = {
+      APPROVED: 'aprobado',
+      REJECTED: 'rechazado',
+      RESOLVED: 'resuelto',
+      IN_REVIEW: 'en revisión',
+    };
+
+    const label = statusLabels[newStatus] || newStatus.toLowerCase();
+    const title = `Tu reporte fue ${label}`;
+    const message = `Tu reporte "${existing.title}" ha sido ${label}.`;
+
+    // Send push notification (fire and forget)
+    this.notificationsService.sendToUser(
+      existing.creatorId,
+      title,
+      message,
+      { reportId, status: newStatus },
+    ).catch(() => {});
+
+    // Save in-app notification
+    this.notificationsService.saveInAppNotification(
+      existing.creatorId,
+      `REPORT_${newStatus}`,
+      title,
+      message,
+      'report',
+      reportId,
+    ).catch(() => {});
 
     return { id: reportId, previousStatus, newStatus };
   }
