@@ -1,17 +1,6 @@
-export const QUITO_COLORS = {
-  terracotta: '#B85C38',
-  terracottaDark: '#963D1F',
-  sage: '#5C8A6A',
-  sageDark: '#3D6B4C',
-  gold: '#C4A265',
-  goldLight: '#D4BA85',
-  stone: '#E8DDD3',
-  stoneDark: '#D4C5B5',
-  charcoal: '#2C2C2C',
-  slate: '#4A5568',
-  offWhite: '#FAF7F2',
-  warmGray: '#9B918A',
-};
+import { Q } from '../../lib/colors';
+
+export const QUITO_COLORS = Q;
 
 export const features = [
   {
