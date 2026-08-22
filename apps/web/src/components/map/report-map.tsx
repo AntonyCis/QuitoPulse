@@ -44,7 +44,7 @@ export function ReportMap({
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || map.current || !MAPBOX_TOKEN) return;
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -152,19 +152,31 @@ export function ReportMap({
     }
   }, [reports, mapLoaded, selectedReportId, onReportClick]);
 
+  // No token - show placeholder
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-gray-900 text-white">
+        <div className="text-center p-6">
+          <div className="mb-4 text-5xl">🗺️</div>
+          <p className="text-lg font-semibold mb-2">Mapbox Token Requerido</p>
+          <p className="text-sm text-gray-300 mb-4">
+            Agrega tu token de Mapbox en el archivo <code className="bg-gray-700 px-1.5 py-0.5 rounded text-xs">.env</code>
+          </p>
+          <div className="rounded-lg bg-gray-800 p-4 text-left text-xs">
+            <p className="text-gray-400 mb-1"># En apps/web/.env</p>
+            <p className="text-green-400">VITE_MAPBOX_TOKEN=pk.eyJ1Ijoi...</p>
+          </div>
+          <p className="mt-4 text-xs text-gray-500">
+            Obtén tu token en <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-300">mapbox.com</a>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-full w-full">
       <div ref={mapContainer} className="h-full w-full" />
-      {!MAPBOX_TOKEN && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 text-white">
-          <div className="text-center p-6">
-            <p className="text-lg font-semibold mb-2">Mapbox Token Requerido</p>
-            <p className="text-sm text-gray-300">
-              Agrega <code className="bg-gray-700 px-1 rounded">VITE_MAPBOX_TOKEN</code> en tu archivo .env
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
