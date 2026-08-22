@@ -1,12 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 // Quito center coordinates
 const QUITO_CENTER: [number, number] = [-78.4678, -0.1807];
 const QUITO_ZOOM = 12;
+
+// Free basemap from CARTO (no API key needed)
+const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 interface ReportMarker {
   id: string;
@@ -38,26 +39,23 @@ export function ReportMap({
   initialZoom = QUITO_ZOOM,
 }: ReportMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  const map = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current || !MAPBOX_TOKEN) return;
+    if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-
-    const m = new mapboxgl.Map({
+    const m = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: BASEMAP_STYLE,
       center: initialCenter,
       zoom: initialZoom,
-      attributionControl: true,
     });
 
-    m.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    m.addControl(new mapboxgl.GeolocateControl({ showUserLocation: true }), 'top-right');
+    m.addControl(new maplibregl.NavigationControl(), 'top-right');
+    m.addControl(new maplibregl.GeolocateControl({ showUserLocation: true }), 'top-right');
 
     m.on('load', () => setMapLoaded(true));
 
@@ -130,10 +128,10 @@ export function ReportMap({
         el.classList.add('ring-2', 'ring-white');
       }
 
-      const marker = new mapboxgl.Marker({ element: el })
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([report.longitude, report.latitude])
         .setPopup(
-          new mapboxgl.Popup({ offset: 20, closeButton: false, maxWidth: '240px' }).setHTML(`
+          new maplibregl.Popup({ offset: 20, closeButton: false, maxWidth: '240px' }).setHTML(`
             <div style="padding: 4px; font-family: sans-serif;">
               <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">${report.title}</div>
               <div style="color: ${report.categoryColor}; font-size: 11px; font-weight: 500;">${report.categoryName}</div>
@@ -151,28 +149,6 @@ export function ReportMap({
       markersRef.current.set(report.id, marker);
     }
   }, [reports, mapLoaded, selectedReportId, onReportClick]);
-
-  // No token - show placeholder
-  if (!MAPBOX_TOKEN) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-gray-900 text-white">
-        <div className="text-center p-6">
-          <div className="mb-4 text-5xl">🗺️</div>
-          <p className="text-lg font-semibold mb-2">Mapbox Token Requerido</p>
-          <p className="text-sm text-gray-300 mb-4">
-            Agrega tu token de Mapbox en el archivo <code className="bg-gray-700 px-1.5 py-0.5 rounded text-xs">.env</code>
-          </p>
-          <div className="rounded-lg bg-gray-800 p-4 text-left text-xs">
-            <p className="text-gray-400 mb-1"># En apps/web/.env</p>
-            <p className="text-green-400">VITE_MAPBOX_TOKEN=pk.eyJ1Ijoi...</p>
-          </div>
-          <p className="mt-4 text-xs text-gray-500">
-            Obtén tu token en <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-300">mapbox.com</a>
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative h-full w-full">
