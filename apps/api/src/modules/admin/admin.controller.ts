@@ -3,6 +3,12 @@ import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import {
+  adminUpdateRoleSchema,
+  adminUpdateReportStatusSchema,
+  adminPaginationSchema,
+} from './dto/admin.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -17,20 +23,21 @@ export class AdminController {
 
   @Get('users')
   getUsers(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('search') search?: string,
+    @Query(new ZodValidationPipe(adminPaginationSchema)) query: {
+      page: number;
+      limit: number;
+      search?: string;
+    },
   ) {
-    return this.adminService.getUsers(
-      page ? parseInt(page) : 1,
-      limit ? parseInt(limit) : 20,
-      search,
-    );
+    return this.adminService.getUsers(query.page, query.limit, query.search);
   }
 
   @Patch('users/:id/role')
-  updateUserRole(@Param('id') id: string, @Body('role') role: string) {
-    return this.adminService.updateUserRole(id, role);
+  updateUserRole(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(adminUpdateRoleSchema)) body: { role: string },
+  ) {
+    return this.adminService.updateUserRole(id, body.role);
   }
 
   @Patch('users/:id/toggle-active')
@@ -40,34 +47,34 @@ export class AdminController {
 
   @Get('reports/pending')
   getPendingReports(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query(new ZodValidationPipe(adminPaginationSchema)) query: {
+      page: number;
+      limit: number;
+    },
   ) {
-    return this.adminService.getPendingReports(
-      page ? parseInt(page) : 1,
-      limit ? parseInt(limit) : 20,
-    );
+    return this.adminService.getPendingReports(query.page, query.limit);
   }
 
   @Patch('reports/:id/status')
   updateReportStatus(
     @Param('id') id: string,
-    @Body('status') status: string,
-    @Body('moderatorId') moderatorId: string,
-    @Body('reason') reason?: string,
+    @Body(new ZodValidationPipe(adminUpdateReportStatusSchema)) body: {
+      status: string;
+      moderatorId: string;
+      reason?: string;
+    },
   ) {
-    return this.adminService.updateReportStatus(id, status, moderatorId, reason);
+    return this.adminService.updateReportStatus(id, body.status, body.moderatorId, body.reason);
   }
 
   @Get('flags/pending')
   getPendingFlags(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query(new ZodValidationPipe(adminPaginationSchema)) query: {
+      page: number;
+      limit: number;
+    },
   ) {
-    return this.adminService.getPendingFlags(
-      page ? parseInt(page) : 1,
-      limit ? parseInt(limit) : 20,
-    );
+    return this.adminService.getPendingFlags(query.page, query.limit);
   }
 
   @Patch('flags/:id/dismiss')

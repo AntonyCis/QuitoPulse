@@ -8,13 +8,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { ReportsService } from './reports.service';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
-  CreateReportDto,
-  UpdateReportDto,
-  ReportQueryDto,
-  CreateCommentDto,
-  CreateFlagDto,
-} from './dto/reports.dto';
+  createReportSchema,
+  updateReportSchema,
+  reportFiltersSchema,
+  commentSchema,
+  flagSchema,
+  paginationSchema,
+} from '@radar-quito/validation';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 
@@ -24,21 +26,27 @@ export class ReportsController {
 
   @Public()
   @Get()
-  findMany(@Query() query: ReportQueryDto) {
+  findMany(@Query(new ZodValidationPipe(reportFiltersSchema)) query: {
+    page: number;
+    limit: number;
+    category?: string;
+    status?: string;
+    west?: number;
+    south?: number;
+    east?: number;
+    north?: number;
+    dateFrom?: string;
+    dateTo?: string;
+  }) {
     return this.reportsService.findMany(query);
   }
 
   @Get('me')
   getMyReports(
     @CurrentUser() user: { id: string },
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query(new ZodValidationPipe(paginationSchema)) query: { page: number; limit: number },
   ) {
-    return this.reportsService.getMyReports(
-      user.id,
-      page ? parseInt(page, 10) : 1,
-      limit ? parseInt(limit, 10) : 20,
-    );
+    return this.reportsService.getMyReports(user.id, query.page, query.limit);
   }
 
   @Public()
@@ -48,14 +56,32 @@ export class ReportsController {
   }
 
   @Post()
-  create(@Body() dto: CreateReportDto, @CurrentUser() user: { id: string }) {
+  create(
+    @Body(new ZodValidationPipe(createReportSchema)) dto: {
+      title: string;
+      description: string;
+      categoryId: string;
+      latitude: number;
+      longitude: number;
+      priority?: string;
+      address?: string;
+      incidentDate?: string;
+    },
+    @CurrentUser() user: { id: string },
+  ) {
     return this.reportsService.create(dto, user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() dto: UpdateReportDto,
+    @Body(new ZodValidationPipe(updateReportSchema)) dto: {
+      title?: string;
+      description?: string;
+      categoryId?: string;
+      priority?: string;
+      address?: string;
+    },
     @CurrentUser() user: { id: string },
   ) {
     return this.reportsService.update(id, dto, user.id);
@@ -69,7 +95,7 @@ export class ReportsController {
   @Post(':id/comments')
   addComment(
     @Param('id') id: string,
-    @Body() dto: CreateCommentDto,
+    @Body(new ZodValidationPipe(commentSchema)) dto: { content: string },
     @CurrentUser() user: { id: string },
   ) {
     return this.reportsService.addComment(id, user.id, dto.content);
@@ -78,7 +104,7 @@ export class ReportsController {
   @Post(':id/flag')
   flag(
     @Param('id') id: string,
-    @Body() dto: CreateFlagDto,
+    @Body(new ZodValidationPipe(flagSchema)) dto: { reason: string },
     @CurrentUser() user: { id: string },
   ) {
     return this.reportsService.flag(id, user.id, dto.reason);

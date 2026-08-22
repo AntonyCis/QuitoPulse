@@ -7,9 +7,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshDto, LogoutDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
+import { registerSchema, loginSchema, refreshSchema } from '@radar-quito/validation';
 import { Request } from 'express';
 
 @Controller('auth')
@@ -18,7 +19,10 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() dto: RegisterDto, @Req() req: Request) {
+  async register(
+    @Body(new ZodValidationPipe(registerSchema)) dto: { email: string; password: string; displayName?: string },
+    @Req() req: Request,
+  ) {
     const ip = req.ip || req.socket.remoteAddress;
     return this.authService.register(dto.email, dto.password, dto.displayName, ip);
   }
@@ -26,7 +30,10 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Req() req: Request) {
+  async login(
+    @Body(new ZodValidationPipe(loginSchema)) dto: { email: string; password: string },
+    @Req() req: Request,
+  ) {
     const ip = req.ip || req.socket.remoteAddress;
     return this.authService.login(dto.email, dto.password, ip);
   }
@@ -34,7 +41,9 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() dto: RefreshDto) {
+  async refresh(
+    @Body(new ZodValidationPipe(refreshSchema)) dto: { refreshToken: string },
+  ) {
     return this.authService.refresh(dto.refreshToken);
   }
 
@@ -42,7 +51,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(
     @CurrentUser() user: { id: string },
-    @Body() dto: LogoutDto,
+    @Body() dto: { refreshToken?: string },
   ) {
     await this.authService.logout(user.id, dto.refreshToken);
     return { message: 'Sesión cerrada' };
