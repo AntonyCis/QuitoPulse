@@ -6,7 +6,7 @@ export function Header({ onReportClick }: { onReportClick?: () => void }) {
 
   return (
     <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between bg-white/95 px-4 py-3 shadow-sm backdrop-blur-sm">
-      <Link to="/" className="flex items-center gap-2">
+      <Link to="/map" className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
           R
         </div>

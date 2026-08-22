@@ -1,4 +1,4 @@
-export const QUITE_COLORS = {
+export const QUITO_COLORS = {
   terracotta: '#B85C38',
   terracottaDark: '#963D1F',
   sage: '#5C8A6A',
