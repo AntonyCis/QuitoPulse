@@ -4,7 +4,7 @@
 
 **Plataforma ciudadana de reportes geolocalizados para Quito, Ecuador**
 
-![Landing Page](docs/landing-preview.png)
+<img width="1896" height="956" alt="Captura desde 2026-08-21 22-04-55" src="https://github.com/user-attachments/assets/4d88ce6d-5a07-4f38-871f-a20c582c738e" />
 
 </div>
 
