@@ -34,6 +34,7 @@ export function LandingPage() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Hero entrance
       const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       heroTl
         .from('.hero-badge', { y: 20, opacity: 0, duration: 0.6 })
@@ -42,25 +43,44 @@ export function LandingPage() {
         .from('.hero-cta', { y: 20, opacity: 0, duration: 0.5 }, '-=0.4')
         .from('.hero-visual', { y: 60, opacity: 0, scale: 0.95, duration: 1 }, '-=0.3');
 
-      gsap.from('.feature-card', {
-        scrollTrigger: { trigger: '.features-grid', start: 'top 80%' },
-        y: 60, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power2.out',
+      // Scroll-triggered animations with fromTo to guarantee visibility
+      gsap.utils.toArray<HTMLElement>('.feature-card').forEach((el, i) => {
+        gsap.fromTo(el,
+          { y: 60, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: 0.7, delay: i * 0.1, ease: 'power2.out',
+            scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
+          },
+        );
       });
 
-      gsap.from('.stat-item', {
-        scrollTrigger: { trigger: '.stats-section', start: 'top 85%' },
-        y: 40, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out',
+      gsap.utils.toArray<HTMLElement>('.stat-item').forEach((el, i) => {
+        gsap.fromTo(el,
+          { y: 40, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: 0.6, delay: i * 0.1, ease: 'power2.out',
+            scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' },
+          },
+        );
       });
 
-      gsap.from('.step-card', {
-        scrollTrigger: { trigger: '.steps-section', start: 'top 80%' },
-        y: 50, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out',
+      gsap.utils.toArray<HTMLElement>('.step-card').forEach((el, i) => {
+        gsap.fromTo(el,
+          { y: 50, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: 0.6, delay: i * 0.12, ease: 'power2.out',
+            scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
+          },
+        );
       });
 
-      gsap.from('.cta-block', {
-        scrollTrigger: { trigger: '.cta-section', start: 'top 85%' },
-        y: 50, opacity: 0, duration: 0.8, ease: 'power2.out',
-      });
+      gsap.fromTo('.cta-block',
+        { y: 50, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.8, ease: 'power2.out',
+          scrollTrigger: { trigger: '.cta-section', start: 'top 90%', toggleActions: 'play none none none' },
+        },
+      );
     });
 
     return () => ctx.revert();
