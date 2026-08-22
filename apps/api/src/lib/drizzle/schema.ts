@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 // ============================================
 // ENUMS
@@ -132,8 +133,8 @@ export const reports = pgTable(
     priority: varchar('priority', { length: 20 }).notNull().default('MEDIUM'),
     latitude: doublePrecision('latitude').notNull(),
     longitude: doublePrecision('longitude').notNull(),
-    // PostGIS point geometry — generated from lat/lng
-    location: text('location').notNull(), // Will hold WKT for PostGIS
+    // PostGIS point geometry — auto-generated from lat/lng via DB trigger
+    location: text('location').default(sql`NULL`),
     address: varchar('address', { length: 500 }),
     incidentDate: timestamp('incident_date', { withTimezone: true }),
     confirmationCount: integer('confirmation_count').notNull().default(0),
