@@ -55,6 +55,14 @@ export function LoginPage() {
       {/* Right panel — form */}
       <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
         <div className="w-full max-w-md">
+          {/* Back to home */}
+          <Link to="/" className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-80" style={{ color: Q.warmGray }}>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Volver al inicio
+          </Link>
+
           {/* Mobile logo */}
           <div className="mb-10 text-center lg:hidden">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl font-bold text-lg text-white" style={{ backgroundColor: Q.terracotta }}>R</div>
