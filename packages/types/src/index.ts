@@ -182,3 +182,11 @@ export interface RefreshToken {
   createdAt: string;
   updatedAt: string;
 }
+
+// Type aliases for convenience
+export type RoleType = `${Role}`;
+export type ReportStatusType = `${ReportStatus}`;
+export type ReportPriorityType = `${ReportPriority}`;
+export type ReportCategorySlugType = `${ReportCategorySlug}`;
+export type ModerationActionTypeType = `${ModerationActionType}`;
+export type NotificationTypeType = `${NotificationType}`;
