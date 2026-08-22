@@ -3,7 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/auth-context';
 import { LoginPage } from './pages/login';
 import { RegisterPage } from './pages/register';
-import { App as Home } from './App';
+import { LandingPage } from './pages/landing';
+import { App as MapApp } from './App';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,10 +45,28 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/map" replace />;
   }
 
   return <>{children}</>;
+}
+
+function HomeRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-gray-500">Cargando...</div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/map" replace />;
+  }
+
+  return <LandingPage />;
 }
 
 export default function AppRouter() {
@@ -56,6 +75,7 @@ export default function AppRouter() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<HomeRoute />} />
             <Route
               path="/login"
               element={
@@ -73,10 +93,10 @@ export default function AppRouter() {
               }
             />
             <Route
-              path="/"
+              path="/map"
               element={
                 <ProtectedRoute>
-                  <Home />
+                  <MapApp />
                 </ProtectedRoute>
               }
             />

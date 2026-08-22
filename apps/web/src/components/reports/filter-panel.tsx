@@ -12,7 +12,7 @@ export function FilterPanel({ selectedCategories, onToggleCategory, onClearFilte
   if (!categories) return null;
 
   return (
-    <div className="absolute top-4 left-4 z-10 max-w-xs">
+    <div className="absolute top-20 left-4 z-10 max-w-xs">
       <div className="rounded-lg bg-white/95 p-3 shadow-lg backdrop-blur-sm">
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-700">Categorías</h3>
