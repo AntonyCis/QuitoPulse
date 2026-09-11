@@ -62,6 +62,10 @@ export class UpdateReportDto {
   @IsOptional()
   @MaxLength(500)
   address?: string;
+
+  @IsDateString()
+  @IsOptional()
+  incidentDate?: string;
 }
 
 export class ReportQueryDto {

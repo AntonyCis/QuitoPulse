@@ -191,13 +191,44 @@ export class ReportsService {
       throw new ForbiddenException('Solo puedes editar reportes pendientes');
     }
 
+    const { incidentDate, ...rest } = dto;
+    const data: Partial<typeof reports.$inferInsert> = {
+      ...rest,
+      updatedAt: new Date(),
+      ...(incidentDate ? { incidentDate: new Date(incidentDate) } : {}),
+    };
+
     const [updated] = await this.db
       .update(reports)
-      .set({ ...dto, updatedAt: new Date() })
+      .set(data)
       .where(eq(reports.id, id))
       .returning();
 
     return updated;
+  }
+
+  async delete(id: string, userId: string) {
+    const [existing] = await this.db
+      .select()
+      .from(reports)
+      .where(eq(reports.id, id))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException('Reporte no encontrado');
+    }
+
+    if (existing.creatorId !== userId) {
+      throw new ForbiddenException('No puedes eliminar este reporte');
+    }
+
+    if (existing.status !== 'PENDING') {
+      throw new ForbiddenException('Solo puedes eliminar reportes pendientes');
+    }
+
+    await this.db.delete(reports).where(eq(reports.id, id));
+
+    return { message: 'Reporte eliminado' };
   }
 
   async confirm(reportId: string, userId: string) {
@@ -309,6 +340,8 @@ export class ReportsService {
         categoryColor: categories.color,
         createdAt: reports.createdAt,
         confirmationCount: reports.confirmationCount,
+        latitude: reports.latitude,
+        longitude: reports.longitude,
       })
       .from(reports)
       .leftJoin(categories, eq(reports.categoryId, categories.id))

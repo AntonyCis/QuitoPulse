@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -81,10 +82,16 @@ export class ReportsController {
       categoryId?: string;
       priority?: string;
       address?: string;
+      incidentDate?: string;
     },
     @CurrentUser() user: { id: string },
   ) {
     return this.reportsService.update(id, dto, user.id);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.reportsService.delete(id, user.id);
   }
 
   @Post(':id/confirm')

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useReportDetail, useAddComment } from '../../hooks/use-report-detail';
-import { useConfirmReport } from '../../hooks/use-reports';
+import { useConfirmReport, useDeleteReport } from '../../hooks/use-reports';
 import { useAuth } from '../../contexts/auth-context';
 import { Q } from '../../lib/colors';
+import { ReportEditModal } from './report-edit-modal';
 
 interface ReportDetailProps {
   reportId: string;
@@ -38,8 +39,20 @@ export function ReportDetail({ reportId, onClose }: ReportDetailProps) {
   const { data: report, isLoading } = useReportDetail(reportId);
   const confirmMutation = useConfirmReport();
   const commentMutation = useAddComment();
+  const deleteMutation = useDeleteReport();
   const { user } = useAuth();
   const [comment, setComment] = useState('');
+  const [editing, setEditing] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm('¿Seguro que deseas eliminar este reporte? Esta accion no se puede deshacer.')) return;
+    try {
+      await deleteMutation.mutateAsync(reportId);
+      onClose();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Error al eliminar el reporte');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -56,9 +69,14 @@ export function ReportDetail({ reportId, onClose }: ReportDetailProps) {
 
   const status = STATUS_MAP[report.status] ?? { label: report.status, color: Q.outline };
   const priority = PRIORITY_MAP[report.priority] ?? { label: report.priority, color: Q.outline };
+  const canEdit = !!user && report.creatorId === user.id && report.status === 'PENDING';
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-20 flex h-[85svh] w-full flex-col rounded-t-2xl border-t sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:w-96 sm:max-w-[420px] sm:rounded-none sm:border-l" style={{ backgroundColor: Q.surfaceLowest, borderColor: 'rgba(255,255,255,0.08)' }}>
+    <>
+      <div
+        className="absolute inset-x-0 bottom-0 z-20 flex h-[85svh] w-full flex-col rounded-t-2xl border-t sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:w-96 sm:max-w-[420px] sm:rounded-none sm:border-l"
+        style={{ backgroundColor: Q.surfaceLowest, borderColor: 'rgba(255,255,255,0.08)' }}
+      >
       <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full sm:hidden" style={{ backgroundColor: Q.outlineVariant }} />
       {/* Header */}
       <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
@@ -98,13 +116,47 @@ export function ReportDetail({ reportId, onClose }: ReportDetailProps) {
         </div>
 
         {report.address && (
-          <p className="mb-4 flex items-start gap-2 text-body-md text-on-surface-variant">
+          <p className="mb-2 flex items-start gap-2 text-body-md text-on-surface-variant">
             <span className="material-symbols-outlined shrink-0 text-[18px] text-outline">location_on</span>
             {report.address}
           </p>
         )}
 
+        {report.incidentDate && (
+          <p className="mb-4 flex items-center gap-2 text-body-md text-on-surface-variant">
+            <span className="material-symbols-outlined shrink-0 text-[18px] text-outline">event</span>
+            Ocurrio el{' '}
+            {new Date(report.incidentDate).toLocaleDateString('es-EC', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+        )}
+
         <p className="mb-6 text-body-md leading-relaxed text-on-surface-variant">{report.description}</p>
+
+        {canEdit && (
+          <div className="mb-6 flex gap-2">
+            <button
+              onClick={() => setEditing(true)}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-label-md transition-all hover:opacity-85"
+              style={{ borderColor: `${Q.primary}55`, backgroundColor: `${Q.primary}14`, color: Q.primary }}
+            >
+              <span className="material-symbols-outlined text-[18px]">edit</span>
+              Editar
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-label-md transition-all hover:opacity-85 disabled:opacity-40"
+              style={{ borderColor: `${Q.error}55`, backgroundColor: `${Q.error}14`, color: Q.error }}
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
+              {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+            </button>
+          </div>
+        )}
 
         {/* Images */}
         {report.images.length > 0 && (
@@ -201,6 +253,9 @@ export function ReportDetail({ reportId, onClose }: ReportDetailProps) {
           )}
         </div>
       </div>
-    </div>
+      </div>
+
+      {editing && report && <ReportEditModal report={report} onClose={() => setEditing(false)} />}
+    </>
   );
 }

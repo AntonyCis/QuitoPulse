@@ -12,6 +12,7 @@ import {
 import * as schema from '../../lib/drizzle/schema';
 import { eq, desc, sql, count, and } from 'drizzle-orm';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AdminService {
@@ -19,6 +20,7 @@ export class AdminService {
     @Inject(DATABASE_CONNECTION)
     private readonly db: NodePgDatabase<typeof schema>,
     private readonly notificationsService: NotificationsService,
+    private readonly auditService: AuditService,
   ) {}
 
   async getStats() {
@@ -142,13 +144,20 @@ export class AdminService {
     return updated;
   }
 
-  async getPendingReports(page = 1, limit = 20) {
+  async getReports(page = 1, limit = 20, status?: string) {
     const offset = (page - 1) * limit;
+    const conditions = [];
+
+    if (status) {
+      conditions.push(eq(reports.status, status));
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [totalResult] = await this.db
       .select({ count: count() })
       .from(reports)
-      .where(eq(reports.status, 'PENDING'));
+      .where(where);
 
     const total = totalResult?.count ?? 0;
 
@@ -170,12 +179,16 @@ export class AdminService {
       .from(reports)
       .leftJoin(categories, eq(reports.categoryId, categories.id))
       .leftJoin(users, eq(reports.creatorId, users.id))
-      .where(eq(reports.status, 'PENDING'))
+      .where(where)
       .orderBy(desc(reports.createdAt))
       .limit(limit)
       .offset(offset);
 
     return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async getPendingReports(page = 1, limit = 20) {
+    return this.getReports(page, limit, 'PENDING');
   }
 
   async updateReportStatus(
@@ -239,6 +252,33 @@ export class AdminService {
     ).catch(() => {});
 
     return { id: reportId, previousStatus, newStatus };
+  }
+
+  async updateReportPriority(reportId: string, priority: string, moderatorId: string) {
+    const [existing] = await this.db
+      .select({ id: reports.id, priority: reports.priority })
+      .from(reports)
+      .where(eq(reports.id, reportId))
+      .limit(1);
+
+    if (!existing) return null;
+
+    const previousPriority = existing.priority;
+
+    await this.db
+      .update(reports)
+      .set({ priority, updatedAt: new Date() })
+      .where(eq(reports.id, reportId));
+
+    await this.auditService.log({
+      userId: moderatorId,
+      action: 'REPORT_PRIORITY_UPDATED',
+      entityType: 'report',
+      entityId: reportId,
+      metadata: { previousPriority, newPriority: priority },
+    });
+
+    return { id: reportId, previousPriority, newPriority: priority };
   }
 
   async getPendingFlags(page = 1, limit = 20) {

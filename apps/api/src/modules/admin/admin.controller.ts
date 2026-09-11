@@ -7,6 +7,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
   adminUpdateRoleSchema,
   adminUpdateReportStatusSchema,
+  adminUpdateReportPrioritySchema,
   adminPaginationSchema,
 } from './dto/admin.dto';
 
@@ -50,9 +51,23 @@ export class AdminController {
     @Query(new ZodValidationPipe(adminPaginationSchema)) query: {
       page: number;
       limit: number;
+      search?: string;
+      status?: string;
     },
   ) {
     return this.adminService.getPendingReports(query.page, query.limit);
+  }
+
+  @Get('reports')
+  getReports(
+    @Query(new ZodValidationPipe(adminPaginationSchema)) query: {
+      page: number;
+      limit: number;
+      search?: string;
+      status?: string;
+    },
+  ) {
+    return this.adminService.getReports(query.page, query.limit, query.status);
   }
 
   @Patch('reports/:id/status')
@@ -65,6 +80,17 @@ export class AdminController {
     },
   ) {
     return this.adminService.updateReportStatus(id, body.status, body.moderatorId, body.reason);
+  }
+
+  @Patch('reports/:id/priority')
+  updateReportPriority(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(adminUpdateReportPrioritySchema)) body: {
+      priority: string;
+      moderatorId: string;
+    },
+  ) {
+    return this.adminService.updateReportPriority(id, body.priority, body.moderatorId);
   }
 
   @Get('flags/pending')

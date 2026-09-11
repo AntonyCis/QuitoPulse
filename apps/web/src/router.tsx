@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/auth-context';
 import { LoginPage } from './pages/login';
 import { RegisterPage } from './pages/register';
 import { LandingPage } from './pages/landing';
+import { AccountPage } from './pages/account';
 import { App as MapApp } from './App';
 
 const queryClient = new QueryClient({
@@ -97,6 +98,14 @@ export default function AppRouter() {
               element={
                 <ProtectedRoute>
                   <MapApp />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <ProtectedRoute>
+                  <AccountPage />
                 </ProtectedRoute>
               }
             />

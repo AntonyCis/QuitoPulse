@@ -53,6 +53,7 @@ export const updateReportSchema = z.object({
   categoryId: z.string().uuid('Categoría inválida').optional(),
   priority: reportPriorityEnum.optional(),
   address: z.string().max(500).optional(),
+  incidentDate: z.string().datetime().optional(),
 });
 
 export type UpdateReportInput = z.infer<typeof updateReportSchema>;

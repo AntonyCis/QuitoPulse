@@ -42,6 +42,12 @@ describe('AdminService', () => {
     });
   });
 
+  describe('updateReportPriority', () => {
+    it('should be callable', () => {
+      expect(typeof AdminService.prototype.updateReportPriority).toBe('function');
+    });
+  });
+
   describe('getPendingFlags', () => {
     it('should be callable', () => {
       expect(typeof AdminService.prototype.getPendingFlags).toBe('function');

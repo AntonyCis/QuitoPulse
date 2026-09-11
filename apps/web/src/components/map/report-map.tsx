@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -8,6 +8,10 @@ const QUITO_ZOOM = 12;
 
 // Free basemap from CARTO (no API key needed)
 const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+
+const HEAT_LAYER_ID = 'reports-heat';
+
+type GeoJSONData = Parameters<maplibregl.GeoJSONSource['setData']>[0];
 
 interface ReportMarker {
   id: string;
@@ -30,6 +34,32 @@ interface ReportMapProps {
   initialZoom?: number;
 }
 
+function buildHeatGeoJSON(reports: ReportMarker[]): GeoJSONData {
+  return {
+    type: 'FeatureCollection' as const,
+    features: reports.map((r) => ({
+      type: 'Feature' as const,
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [r.longitude, r.latitude],
+      },
+      properties: {
+        count: r.confirmationCount,
+      },
+    })),
+  };
+}
+
+function buildPopupHTML(report: ReportMarker): string {
+  return `
+    <div class="report-popup">
+      <div class="report-popup__title">${report.title}</div>
+      <div class="report-popup__category" style="color:${report.categoryColor}">${report.categoryName}</div>
+      <div class="report-popup__meta">${report.confirmationCount} confirmaciones</div>
+    </div>
+  `;
+}
+
 export function ReportMap({
   reports,
   onReportClick,
@@ -41,11 +71,40 @@ export function ReportMap({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
+  const popupRef = useRef<maplibregl.Popup | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [heatVisible, setHeatVisible] = useState(false);
+
+  const closeHoverPopup = useCallback(() => {
+    popupRef.current?.remove();
+    popupRef.current = null;
+  }, []);
+
+  const openHoverPopup = useCallback(
+    (report: ReportMarker) => {
+      const m = map.current;
+      if (!m) return;
+      closeHoverPopup();
+      const popup = new maplibregl.Popup({
+        offset: 14,
+        anchor: 'bottom',
+        closeButton: false,
+        focusAfterOpen: false,
+        maxWidth: '260px',
+      })
+        .setLngLat([report.longitude, report.latitude])
+        .setHTML(buildPopupHTML(report))
+        .addTo(m);
+      popupRef.current = popup;
+    },
+    [closeHoverPopup],
+  );
 
   // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
+
+    markersRef.current.clear();
 
     const m = new maplibregl.Map({
       container: mapContainer.current,
@@ -77,7 +136,7 @@ export function ReportMap({
       m.remove();
       map.current = null;
     };
-  }, []);
+  }, [initialCenter, initialZoom, onMapMove]);
 
   // Report markers
   useEffect(() => {
@@ -101,58 +160,121 @@ export function ReportMap({
         // Update highlight state
         const el = existing.getElement();
         if (report.id === selectedReportId) {
-          el.classList.add('ring-2', 'ring-white');
+          el.classList.add('report-marker--selected');
         } else {
-          el.classList.remove('ring-2', 'ring-white');
+          el.classList.remove('report-marker--selected');
         }
         continue;
       }
 
-      // Create marker element
+      // Create marker element. The root element is positioned by MapLibre via
+      // an inline `transform: translate(...)` — never override it (that made
+      // markers fly to the top-left corner on hover). Hover scale is applied
+      // to the inner dot from CSS.
       const el = document.createElement('div');
       el.className = 'report-marker';
-      el.style.cssText = `
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background-color: ${report.categoryColor};
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        cursor: pointer;
-        transition: transform 0.15s ease;
-      `;
-      el.onmouseenter = () => { el.style.transform = 'scale(1.2)'; };
-      el.onmouseleave = () => { el.style.transform = 'scale(1)'; };
-
       if (report.id === selectedReportId) {
-        el.classList.add('ring-2', 'ring-white');
+        el.classList.add('report-marker--selected');
       }
 
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([report.longitude, report.latitude])
-        .setPopup(
-          new maplibregl.Popup({ offset: 20, closeButton: false, maxWidth: '240px' }).setHTML(`
-            <div style="padding: 4px; font-family: sans-serif;">
-              <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">${report.title}</div>
-              <div style="color: ${report.categoryColor}; font-size: 11px; font-weight: 500;">${report.categoryName}</div>
-              <div style="color: #666; font-size: 11px; margin-top: 2px;">${report.confirmationCount} confirmaciones</div>
-            </div>
-          `)
-        )
-        .addTo(map.current);
+      const dot = document.createElement('div');
+      dot.className = 'report-marker__dot';
+      dot.style.backgroundColor = report.categoryColor;
+      el.appendChild(dot);
 
+      el.addEventListener('mouseenter', () => openHoverPopup(report));
+      el.addEventListener('mouseleave', closeHoverPopup);
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         onReportClick(report.id);
       });
 
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([report.longitude, report.latitude])
+        .addTo(map.current);
+
       markersRef.current.set(report.id, marker);
     }
-  }, [reports, mapLoaded, selectedReportId, onReportClick]);
+  }, [reports, mapLoaded, selectedReportId, onReportClick, openHoverPopup, closeHoverPopup]);
+
+  // Add heat source + layer once the map is ready
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapLoaded) return;
+    if (m.getLayer(HEAT_LAYER_ID)) return;
+
+    m.addSource(HEAT_LAYER_ID, { type: 'geojson', data: buildHeatGeoJSON(reports) });
+    m.addLayer({
+      id: HEAT_LAYER_ID,
+      type: 'heatmap',
+      source: HEAT_LAYER_ID,
+      layout: { visibility: heatVisible ? 'visible' : 'none' },
+      paint: {
+        'heatmap-weight': [
+          'interpolate',
+          ['linear'],
+          ['get', 'count'],
+          0, 0,
+          1, 0.4,
+          30, 1,
+        ],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 18, 2.4],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 5, 14, 16, 34],
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0, 'rgba(23, 31, 51, 0)',
+          0.1, 'rgba(128, 131, 255, 0.25)',
+          0.35, 'rgba(128, 131, 255, 0.6)',
+          0.55, '#4cd7f6',
+          0.75, '#ffd54f',
+          1, '#ff5252',
+        ],
+        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0.5, 16, 0.65],
+      },
+    });
+  }, [mapLoaded, reports, heatVisible]);
+
+  // Keep heat data in sync
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapLoaded || !m.getLayer(HEAT_LAYER_ID)) return;
+    (m.getSource(HEAT_LAYER_ID) as maplibregl.GeoJSONSource).setData(buildHeatGeoJSON(reports));
+  }, [reports, mapLoaded]);
+
+  // Toggle heat visibility
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !mapLoaded || !m.getLayer(HEAT_LAYER_ID)) return;
+    m.setLayoutProperty(HEAT_LAYER_ID, 'visibility', heatVisible ? 'visible' : 'none');
+  }, [heatVisible, mapLoaded]);
 
   return (
     <div className="relative h-full w-full">
       <div ref={mapContainer} className="h-full w-full" />
+
+      {/* Heat zone toggle */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <button
+          type="button"
+          onClick={() => setHeatVisible((v) => !v)}
+          aria-pressed={heatVisible}
+          className="flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold backdrop-blur-xl transition-all hover:opacity-90"
+          style={{
+            backgroundColor: heatVisible ? 'rgba(76,215,246,0.15)' : 'rgba(23,31,51,0.8)',
+            borderColor: heatVisible ? 'rgba(76,215,246,0.5)' : 'rgba(255,255,255,0.12)',
+            color: heatVisible ? '#4cd7f6' : '#c7c4d7',
+          }}
+        >
+          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="12" cy="12" r="10" opacity="0.35" />
+            <circle cx="12" cy="12" r="5" opacity="0.8" />
+            <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+          </svg>
+          {heatVisible ? 'Calor: activo' : 'Ver zona de calor'}
+        </button>
+      </div>
     </div>
   );
 }

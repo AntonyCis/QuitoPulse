@@ -41,4 +41,10 @@ describe('ReportsService', () => {
       expect(typeof ReportsService.prototype.getMyReports).toBe('function');
     });
   });
+
+  describe('delete', () => {
+    it('should be callable', () => {
+      expect(typeof ReportsService.prototype.delete).toBe('function');
+    });
+  });
 });

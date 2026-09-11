@@ -90,3 +90,78 @@ export function useConfirmReport() {
     },
   });
 }
+
+export interface UpdateReportPayload {
+  title?: string;
+  description?: string;
+  categoryId?: string;
+  priority?: string;
+  address?: string;
+  incidentDate?: string;
+}
+
+export function useUpdateReport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateReportPayload }) =>
+      apiClient.patch<ReportListItem>(`/reports/${id}`, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['report', id] });
+      queryClient.invalidateQueries({ queryKey: ['my-reports'] });
+    },
+  });
+}
+
+export function useDeleteReport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => apiClient.delete<{ message: string }>(`/reports/${id}`),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['report', id] });
+      queryClient.invalidateQueries({ queryKey: ['my-reports'] });
+    },
+  });
+}
+
+export interface MyReportItem {
+  id: string;
+  title: string;
+  status: string;
+  categoryLabel: string;
+  categoryColor: string;
+  createdAt: string;
+  confirmationCount: number;
+  latitude: number;
+  longitude: number;
+}
+
+export function useMyReports(page = 1, limit = 10) {
+  return useQuery({
+    queryKey: ['my-reports', page, limit],
+    queryFn: () => apiClient.get<ReportsResponse>(`/reports/me`, { page, limit }),
+  });
+}
+
+export function useAttachReportImage(reportId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      key: string;
+      filename: string;
+      mimeType: string;
+      fileSize: number;
+    }) =>
+      apiClient.post<{ id: string }>(`/reports/${reportId}/images`, {
+        ...data,
+        thumbnailUrl: undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report', reportId] });
+    },
+  });
+}

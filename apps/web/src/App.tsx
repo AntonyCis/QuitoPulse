@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ReportMap, ReportMarker } from './components/map/report-map';
 import { FilterPanel } from './components/reports/filter-panel';
 import { ReportDetail } from './components/reports/report-detail';
@@ -7,7 +8,15 @@ import { Header } from './components/layout/header';
 import { useReports } from './hooks/use-reports';
 
 export function App() {
-  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const urlReportId = searchParams.get('report');
+  const urlLat = Number(searchParams.get('lat'));
+  const urlLng = Number(searchParams.get('lng'));
+  const focusFromUrl =
+    Number.isFinite(urlLat) && Number.isFinite(urlLng)
+      ? ([urlLng, urlLat] as [number, number])
+      : undefined;
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(urlReportId);
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [showCreateReport, setShowCreateReport] = useState(false);
   const [mapBounds, setMapBounds] = useState<{
@@ -67,6 +76,7 @@ export function App() {
           onReportClick={handleReportClick}
           onMapMove={handleMapMove}
           selectedReportId={selectedReportId || undefined}
+          initialCenter={focusFromUrl}
         />
 
         {/* Filters */}

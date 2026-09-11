@@ -10,12 +10,19 @@ export const adminUpdateReportStatusSchema = z.object({
   reason: z.string().max(1000).optional(),
 });
 
+export const adminUpdateReportPrioritySchema = z.object({
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
+  moderatorId: z.string().uuid(),
+});
+
 export const adminPaginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().max(200).optional(),
+  status: z.string().max(20).optional(),
 });
 
 export type AdminUpdateRoleInput = z.infer<typeof adminUpdateRoleSchema>;
 export type AdminUpdateReportStatusInput = z.infer<typeof adminUpdateReportStatusSchema>;
+export type AdminUpdateReportPriorityInput = z.infer<typeof adminUpdateReportPrioritySchema>;
 export type AdminPaginationInput = z.infer<typeof adminPaginationSchema>;

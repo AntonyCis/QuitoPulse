@@ -35,12 +35,18 @@ export function Header({ onReportClick }: { onReportClick?: () => void }) {
 
         {isAuthenticated ? (
           <div className="flex items-center gap-1.5 sm:gap-3">
-            <div
-              className="flex h-7 w-7 items-center justify-center rounded-full text-xs sm:h-8 sm:w-8 sm:text-label-md"
-              style={{ backgroundColor: `${Q.primaryContainer}40`, color: Q.primary, border: `1px solid ${Q.primaryContainer}55` }}
+            <Link
+              to="/account"
+              title="Mi cuenta"
+              className="flex items-center gap-2"
             >
-              {user?.email?.[0]?.toUpperCase() ?? '?'}
-            </div>
+              <div
+                className="flex h-7 w-7 items-center justify-center rounded-full text-xs sm:h-8 sm:w-8 sm:text-label-md"
+                style={{ backgroundColor: `${Q.primaryContainer}40`, color: Q.primary, border: `1px solid ${Q.primaryContainer}55` }}
+              >
+                {user?.email?.[0]?.toUpperCase() ?? '?'}
+              </div>
+            </Link>
             <button
               onClick={logout}
               className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-label-md text-on-surface-variant transition-colors hover:bg-white/10 hover:text-on-surface sm:px-3"
