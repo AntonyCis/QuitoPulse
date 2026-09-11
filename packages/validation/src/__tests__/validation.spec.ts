@@ -55,11 +55,13 @@ describe('Validation Schemas', () => {
   });
 
   describe('createReportSchema', () => {
+    const validCategoryId = 'a1b2c3d4-e5f6-4a5b-9c8d-7f6e5d4c3b2a';
+
     it('should validate valid report', () => {
       const result = createReportSchema.safeParse({
         title: 'Traffic jam on 6 de Agosto',
         description: 'Major traffic jam on 6 de Agosto avenue due to accident',
-        category: 'TRAFFIC',
+        categoryId: validCategoryId,
         latitude: -0.1807,
         longitude: -78.4678,
         priority: 'HIGH',
@@ -71,7 +73,7 @@ describe('Validation Schemas', () => {
       const result = createReportSchema.safeParse({
         title: 'AB',
         description: 'Description that is long enough',
-        category: 'TRAFFIC',
+        categoryId: validCategoryId,
         latitude: -0.1807,
         longitude: -78.4678,
       });
@@ -82,18 +84,18 @@ describe('Validation Schemas', () => {
       const result = createReportSchema.safeParse({
         title: 'Valid Title',
         description: 'Description that is long enough',
-        category: 'TRAFFIC',
+        categoryId: validCategoryId,
         latitude: 100, // out of range
         longitude: -78.4678,
       });
       expect(result.success).toBe(false);
     });
 
-    it('should reject invalid category', () => {
+    it('should reject invalid categoryId', () => {
       const result = createReportSchema.safeParse({
         title: 'Valid Title',
         description: 'Description that is long enough',
-        category: 'INVALID_CATEGORY',
+        categoryId: 'INVALID_CATEGORY',
         latitude: -0.1807,
         longitude: -78.4678,
       });
@@ -104,7 +106,7 @@ describe('Validation Schemas', () => {
       const result = createReportSchema.safeParse({
         title: 'Valid Title',
         description: 'Description that is long enough',
-        category: 'TRAFFIC',
+        categoryId: validCategoryId,
         latitude: -0.1807,
         longitude: -78.4678,
       });

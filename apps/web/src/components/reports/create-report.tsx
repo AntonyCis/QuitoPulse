@@ -22,6 +22,7 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('MEDIUM');
   const [error, setError] = useState('');
+  const [locationError, setLocationError] = useState('');
 
   const steps = [
     { key: 'category', label: 'Categoria' },
@@ -31,10 +32,10 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
   const currentIdx = steps.findIndex((s) => s.key === step);
 
   const inputStyle = {
-    borderColor: `${Q.white}15`,
-    backgroundColor: `${Q.white}08`,
+    borderColor: '#ffffff15',
+    backgroundColor: '#ffffff08',
     color: 'white' as const,
-    ['--tw-ring-color' as string]: `${Q.terracotta}40`,
+    ['--tw-ring-color' as string]: `${Q.primaryContainer}40`,
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,10 +53,10 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
 
   if (!user) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: `${Q.charcoal}CC` }}>
-        <div className="rounded-2xl p-8 text-center shadow-2xl" style={{ backgroundColor: Q.charcoal }}>
-          <p className="mb-5 text-sm" style={{ color: Q.stoneDark }}>Debes iniciar sesion para crear un reporte</p>
-          <button onClick={onClose} className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: Q.terracotta }}>
+      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ backgroundColor: `${Q.bg}CC` }}>
+        <div className="w-full rounded-t-3xl p-8 text-center shadow-2xl sm:w-auto sm:rounded-2xl" style={{ backgroundColor: Q.surfaceLowest }}>
+          <p className="mb-5 text-sm" style={{ color: Q.outline }}>Debes iniciar sesion para crear un reporte</p>
+          <button onClick={onClose} className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: Q.primaryContainer }}>
             Cerrar
           </button>
         </div>
@@ -64,9 +65,9 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: `${Q.charcoal}CC` }}>
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl" style={{ backgroundColor: Q.charcoal }}>
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: `1px solid ${Q.white}10` }}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" style={{ backgroundColor: `${Q.bg}CC` }}>
+      <div className="flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-3xl shadow-2xl sm:max-h-[85svh] sm:max-w-lg sm:rounded-2xl" style={{ backgroundColor: Q.surfaceLowest }}>
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid #ffffff10' }}>
           <h2 className="text-lg font-bold text-white">Nuevo Reporte</h2>
           <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-white/10">
             <svg className="h-4 w-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -75,27 +76,27 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="mb-6 flex items-center gap-1">
+        <div className="flex-1 overflow-y-auto p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <div className="mb-6 flex items-center gap-1 overflow-x-auto">
             {steps.map((s, i) => (
-              <div key={s.key} className="flex items-center gap-1">
+              <div key={s.key} className="flex shrink-0 items-center gap-1">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
-                  style={{ backgroundColor: i <= currentIdx ? Q.terracotta : `${Q.white}10`, color: i <= currentIdx ? 'white' : Q.warmGray }}>
+                  style={{ backgroundColor: i <= currentIdx ? Q.primaryContainer : '#ffffff10', color: i <= currentIdx ? 'white' : Q.onSurfaceVariant }}>
                   {i + 1}
                 </div>
-                <span className="text-xs font-medium" style={{ color: i <= currentIdx ? 'white' : Q.warmGray }}>{s.label}</span>
-                {i < steps.length - 1 && <div className="mx-1 h-px w-4" style={{ backgroundColor: `${Q.white}15` }} />}
+                <span className="text-xs font-medium" style={{ color: i <= currentIdx ? 'white' : Q.onSurfaceVariant }}>{s.label}</span>
+                {i < steps.length - 1 && <div className="mx-1 h-px w-4" style={{ backgroundColor: '#ffffff15' }} />}
               </div>
             ))}
           </div>
 
           {error && (
-            <div className="mb-4 rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: Q.errorLight, color: Q.error }}>{error}</div>
+            <div className="mb-4 rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: `${Q.errorContainer}40`, color: Q.error }}>{error}</div>
           )}
 
           {step === 'category' && (
             <div className="space-y-3">
-              <p className="text-sm" style={{ color: Q.warmGray }}>Selecciona la categoria del incidente:</p>
+              <p className="text-sm" style={{ color: Q.onSurfaceVariant }}>Selecciona la categoria del incidente:</p>
               <div className="grid grid-cols-2 gap-2">
                 {categories?.map((cat) => (
                   <button key={cat.id} onClick={() => { setSelectedCategoryId(cat.id); setStep('location'); }}
@@ -111,39 +112,48 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
 
           {step === 'location' && (
             <div className="space-y-4">
-              <p className="text-sm" style={{ color: Q.warmGray }}>Selecciona la ubicacion del incidente:</p>
+              <p className="text-sm" style={{ color: Q.onSurfaceVariant }}>Selecciona la ubicacion del incidente:</p>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium" style={{ color: Q.warmGray }}>Latitud</label>
+                    <label className="mb-1.5 block text-xs font-medium" style={{ color: Q.onSurfaceVariant }}>Latitud</label>
                     <input type="number" step="0.0001" value={latitude} onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
                       className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all focus:ring-2" style={inputStyle} />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium" style={{ color: Q.warmGray }}>Longitud</label>
+                    <label className="mb-1.5 block text-xs font-medium" style={{ color: Q.onSurfaceVariant }}>Longitud</label>
                     <input type="number" step="0.0001" value={longitude} onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
                       className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all focus:ring-2" style={inputStyle} />
                   </div>
                 </div>
                 <button onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      (pos) => { setLatitude(pos.coords.latitude); setLongitude(pos.coords.longitude); },
-                      () => { setLatitude(-0.1807); setLongitude(-78.4678); },
-                    );
+                  if (!navigator.geolocation) {
+                    setLocationError('Tu navegador no soporta geolocalizacion');
+                    return;
                   }
+                  navigator.geolocation.getCurrentPosition(
+                    (pos) => { setLatitude(pos.coords.latitude); setLongitude(pos.coords.longitude); setLocationError(''); },
+                    () => {
+                      setLatitude(-0.1807);
+                      setLongitude(-78.4678);
+                      setLocationError('No se pudo obtener tu ubicacion. Revisa los permisos o desactiva bloqueadores de localizacion.');
+                    },
+                  );
                 }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-sm transition-all hover:opacity-80"
-                  style={{ borderColor: `${Q.sage}50`, color: Q.sage, backgroundColor: `${Q.sage}10` }}>
+                  style={{ borderColor: `${Q.tertiary}50`, color: Q.tertiary, backgroundColor: `${Q.tertiary}10` }}>
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                   </svg>
                   Usar mi ubicacion actual
                 </button>
+                {locationError && (
+                  <p className="text-xs font-medium" style={{ color: Q.warning }}>{locationError}</p>
+                )}
               </div>
               <div className="flex justify-end gap-2">
-                <button onClick={() => setStep('category')} className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/10" style={{ color: Q.warmGray }}>Atras</button>
-                <button onClick={() => setStep('details')} className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: Q.terracotta }}>Siguiente</button>
+                <button onClick={() => setStep('category')} className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/10" style={{ color: Q.onSurfaceVariant }}>Atras</button>
+                <button onClick={() => setStep('details')} className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: Q.primaryContainer }}>Siguiente</button>
               </div>
             </div>
           )}
@@ -166,17 +176,17 @@ export function CreateReport({ onClose, onCreated }: CreateReportProps) {
                 <label className="mb-1.5 block text-sm font-medium text-white">Prioridad</label>
                 <select value={priority} onChange={(e) => setPriority(e.target.value)}
                   className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-all focus:ring-2" style={{ ...inputStyle, appearance: 'none' as const }}>
-                  <option value="LOW" style={{ backgroundColor: Q.charcoal, color: 'white' }}>Baja</option>
-                  <option value="MEDIUM" style={{ backgroundColor: Q.charcoal, color: 'white' }}>Media</option>
-                  <option value="HIGH" style={{ backgroundColor: Q.charcoal, color: 'white' }}>Alta</option>
-                  <option value="URGENT" style={{ backgroundColor: Q.charcoal, color: 'white' }}>Urgente</option>
+                  <option value="LOW" style={{ backgroundColor: Q.surfaceLowest, color: 'white' }}>Baja</option>
+                  <option value="MEDIUM" style={{ backgroundColor: Q.surfaceLowest, color: 'white' }}>Media</option>
+                  <option value="HIGH" style={{ backgroundColor: Q.surfaceLowest, color: 'white' }}>Alta</option>
+                  <option value="URGENT" style={{ backgroundColor: Q.surfaceLowest, color: 'white' }}>Urgente</option>
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setStep('location')} className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/10" style={{ color: Q.warmGray }}>Atras</button>
+                <button type="button" onClick={() => setStep('location')} className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/10" style={{ color: Q.onSurfaceVariant }}>Atras</button>
                 <button type="submit" disabled={createMutation.isPending}
                   className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{ backgroundColor: Q.sage }}>
+                  style={{ backgroundColor: Q.tertiary }}>
                   {createMutation.isPending ? 'Enviando...' : 'Enviar Reporte'}
                 </button>
               </div>

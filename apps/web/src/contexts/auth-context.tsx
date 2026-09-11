@@ -63,9 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleAuth = useCallback((data: AuthTokens & { user: User }) => {
-    apiClient.post('/auth/login', undefined); // trigger token storage via apiClient
-    localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('refreshToken', data.refreshToken);
+    apiClient.setTokens(data.accessToken, data.refreshToken);
     setUser(data.user);
   }, []);
 

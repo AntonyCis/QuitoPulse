@@ -1,22 +1,31 @@
 export const Q = {
-  terracotta: '#B85C38',
-  terracottaDark: '#963D1F',
-  terracottaLight: '#D4845F',
-  sage: '#5C8A6A',
-  sageDark: '#3D6B4C',
-  sageLight: '#7BAA8A',
-  gold: '#C4A265',
-  goldLight: '#D4BA85',
-  stone: '#E8DDD3',
-  stoneDark: '#D4C5B5',
-  stoneLight: '#F0EAE2',
-  charcoal: '#2C2C2C',
-  slate: '#4A5568',
-  offWhite: '#FAF7F2',
-  warmGray: '#9B918A',
-  white: '#FFFFFF',
-  error: '#C0392B',
-  errorLight: '#FADBD8',
-  success: '#27AE60',
-  successLight: '#D5F5E3',
+  // Surfaces (MD3 dark navy)
+  bg: '#0b1326',
+  surfaceLowest: '#060e20',
+  surfaceLow: '#131b2e',
+  surface: '#171f33',
+  surfaceHigh: '#222a3d',
+  surfaceHighest: '#2d3449',
+  surfaceBright: '#31394d',
+
+  // On colors
+  onSurface: '#dae2fd',
+  onSurfaceVariant: '#c7c4d7',
+  outline: '#908fa0',
+  outlineVariant: '#464554',
+
+  // Accents
+  primary: '#c0c1ff',
+  primaryContainer: '#8083ff',
+  inversePrimary: '#494bd6',
+  secondary: '#4cd7f6',
+  secondaryFixed: '#acedff',
+  tertiary: '#4edea3',
+
+  // Status
+  success: '#4edea3',
+  warning: '#ffd54f',
+  error: '#ffb4ab',
+  errorContainer: '#93000a',
+  onErrorContainer: '#ffdad6',
 } as const;

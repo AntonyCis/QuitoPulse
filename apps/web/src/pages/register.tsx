@@ -18,11 +18,11 @@ export function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError('Las contrasenas no coinciden');
       return;
     }
     if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres');
+      setError('La contrasena debe tener al menos 8 caracteres');
       return;
     }
 
@@ -38,37 +38,57 @@ export function RegisterPage() {
   };
 
   const inputStyle = {
-    borderColor: Q.stone,
-    backgroundColor: Q.white,
-    color: Q.charcoal,
-    ['--tw-ring-color' as string]: `${Q.sage}40`,
+    backgroundColor: `${Q.surface}CC`,
+    borderColor: 'rgba(255,255,255,0.1)',
+    color: Q.onSurface,
+    ['--tw-ring-color' as string]: `${Q.tertiary}55`,
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: Q.offWhite }}>
+    <div className="flex min-h-dvh" style={{ backgroundColor: Q.bg }}>
       {/* Left panel — branding */}
-      <div className="hidden w-1/2 items-center justify-center lg:flex" style={{ backgroundColor: Q.charcoal }}>
-        <div className="max-w-md px-12 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl font-bold text-2xl text-white" style={{ backgroundColor: Q.sage }}>
-            R
-          </div>
-          <h2 className="text-3xl font-bold text-white">Únete a Radar Quito</h2>
-          <p className="mt-3 text-sm leading-relaxed" style={{ color: Q.warmGray }}>
-            Crea tu cuenta y comienza a reportar incidentes en tu ciudad. Es gratis y toma menos de un minuto.
+      <div className="relative hidden w-1/2 items-center justify-center overflow-hidden lg:flex">
+        <div
+          className="absolute inset-0 opacity-[0.1]"
+          style={{
+            backgroundImage: `linear-gradient(${Q.tertiary}30 1px, transparent 1px), linear-gradient(90deg, ${Q.tertiary}30 1px, transparent 1px)`,
+            backgroundSize: '44px 44px',
+          }}
+        />
+        <div
+          className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full blur-3xl"
+          style={{ background: `${Q.tertiary}12` }}
+        />
+        <div className="relative z-10 max-w-md px-12 text-center">
+          <span
+            className="material-symbols-outlined mx-auto mb-6 flex h-16 w-16 items-center justify-center !text-[40px] text-tertiary rounded-2xl"
+            style={{ fontVariationSettings: "'FILL' 1", background: `${Q.tertiary}14`, border: `1px solid ${Q.tertiary}33` }}
+          >
+            group_add
+          </span>
+          <h2 className="font-display text-headline-lg font-bold text-on-surface">Unete a Radar Quito</h2>
+          <p className="mt-3 text-body-md leading-relaxed text-on-surface-variant">
+            Crea tu cuenta y empieza a reportar incidentes en tu ciudad. Gratis y en menos de un minuto.
           </p>
           <div className="mt-10 flex flex-col gap-4 text-left">
             {[
-              'Reporta incidentes en tiempo real',
-              'Colabora con tu comunidad',
-              'Recibe notificaciones importantes',
-            ].map((text) => (
-              <div key={text} className="flex items-center gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${Q.sage}30` }}>
-                  <svg className="h-3.5 w-3.5" fill="none" stroke={Q.sage} viewBox="0 0 24 24" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+              { icon: 'edit_location_alt', text: 'Reporta incidentes en tiempo real' },
+              { icon: 'groups', text: 'Colabora con tu comunidad' },
+              { icon: 'notifications_active', text: 'Recibe notificaciones importantes' },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-3">
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                  style={{ backgroundColor: `${Q.tertiary}18`, border: `1px solid ${Q.tertiary}33` }}
+                >
+                  <span
+                    className="material-symbols-outlined text-[20px] text-tertiary"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {item.icon}
+                  </span>
                 </div>
-                <span className="text-sm" style={{ color: Q.stoneDark }}>{text}</span>
+                <span className="text-body-md" style={{ color: Q.onSurfaceVariant }}>{item.text}</span>
               </div>
             ))}
           </div>
@@ -77,103 +97,99 @@ export function RegisterPage() {
 
       {/* Right panel — form */}
       <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
-        <div className="w-full max-w-md">
-          {/* Back to home */}
-          <Link to="/" className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:opacity-80" style={{ color: Q.warmGray }}>
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
+        <div className="glass-card w-full max-w-md rounded-2xl p-6 sm:p-10">
+          <Link to="/" className="mb-8 inline-flex items-center gap-1.5 text-label-md transition-colors hover:text-secondary" style={{ color: Q.outline }}>
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             Volver al inicio
           </Link>
 
-          {/* Mobile logo */}
-          <div className="mb-10 text-center lg:hidden">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl font-bold text-lg text-white" style={{ backgroundColor: Q.sage }}>R</div>
-            <h1 className="text-2xl font-bold" style={{ color: Q.charcoal }}>Radar Quito</h1>
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-bold" style={{ color: Q.charcoal }}>Crear cuenta</h2>
-            <p className="mt-2 text-sm" style={{ color: Q.warmGray }}>Completa los datos para comenzar a reportar</p>
-          </div>
+          <h2 className="font-display text-headline-lg font-bold text-on-surface">Crear cuenta</h2>
+          <p className="mt-2 text-body-md text-on-surface-variant">Completa los datos para empezar a reportar</p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             {error && (
-              <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: Q.errorLight, color: Q.error }}>
+              <div
+                className="rounded-xl px-4 py-3 text-sm font-medium"
+                style={{ backgroundColor: `${Q.errorContainer}40`, color: Q.error, border: `1px solid ${Q.error}33` }}
+              >
                 {error}
               </div>
             )}
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium" style={{ color: Q.charcoal }}>Nombre</label>
+              <label className="mb-1.5 block text-label-md text-on-surface">Nombre</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
+                className="w-full rounded-xl border px-4 py-3 text-body-md outline-none transition-all focus:ring-2"
                 style={inputStyle}
                 placeholder="Tu nombre (opcional)"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium" style={{ color: Q.charcoal }}>Email</label>
+              <label className="mb-1.5 block text-label-md text-on-surface">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
+                className="w-full rounded-xl border px-4 py-3 text-body-md outline-none transition-all focus:ring-2"
                 style={inputStyle}
                 placeholder="tu@email.com"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium" style={{ color: Q.charcoal }}>Contraseña</label>
+              <label className="mb-1.5 block text-label-md text-on-surface">Contrasena</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
+                className="w-full rounded-xl border px-4 py-3 text-body-md outline-none transition-all focus:ring-2"
                 style={inputStyle}
-                placeholder="Mínimo 8 caracteres"
+                placeholder="Minimo 8 caracteres"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium" style={{ color: Q.charcoal }}>Confirmar contraseña</label>
+              <label className="mb-1.5 block text-label-md text-on-surface">Confirmar contrasena</label>
               <input
                 type="password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2"
+                className="w-full rounded-xl border px-4 py-3 text-body-md outline-none transition-all focus:ring-2"
                 style={inputStyle}
-                placeholder="Repite tu contraseña"
+                placeholder="Repite tu contrasena"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:opacity-95 disabled:opacity-50"
-              style={{ backgroundColor: Q.sage }}
+              className="btn-gradient w-full rounded-xl py-3.5 text-label-md text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50"
             >
               {isLoading ? (
                 <span className="inline-flex items-center gap-2">
                   <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                   Creando cuenta...
                 </span>
-              ) : 'Crear Cuenta'}
+              ) : (
+                <span className="inline-flex items-center gap-2">
+                  Crear Cuenta
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </span>
+              )}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm" style={{ color: Q.warmGray }}>
-            ¿Ya tienes cuenta?{' '}
-            <Link to="/login" className="font-semibold transition-colors hover:opacity-80" style={{ color: Q.terracotta }}>
-              Inicia sesión
+          <p className="mt-8 text-center text-body-md text-on-surface-variant">
+            Ya tienes cuenta?{' '}
+            <Link to="/login" className="font-semibold text-secondary transition-colors hover:text-secondary-fixed">
+              Inicia sesion
             </Link>
           </p>
         </div>

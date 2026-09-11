@@ -1,15 +1,80 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { QUITO_COLORS, features, stats, steps } from './data';
-import { Icon } from './icon';
+import { features, secondaryFeatures, stats, steps } from './data';
+import { Q } from '../../lib/colors';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const ACCENTS = {
+  secondary: Q.secondary,
+  primary: Q.primary,
+  tertiary: Q.tertiary,
+} as const;
+
+function RadarDecoration() {
+  return (
+    <svg
+      viewBox="0 0 400 400"
+      fill="none"
+      className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/3 opacity-60 md:h-[620px] md:w-[620px]"
+    >
+      <circle cx="200" cy="200" r="60" stroke={Q.secondary} strokeOpacity="0.22" />
+      <circle cx="200" cy="200" r="110" stroke={Q.secondary} strokeOpacity="0.15" />
+      <circle cx="200" cy="200" r="160" stroke={Q.secondary} strokeOpacity="0.09" />
+      <circle cx="200" cy="200" r="196" stroke={Q.secondary} strokeOpacity="0.05" />
+      <line x1="200" y1="4" x2="200" y2="396" stroke={Q.secondary} strokeOpacity="0.07" />
+      <line x1="4" y1="200" x2="396" y2="200" stroke={Q.secondary} strokeOpacity="0.07" />
+      <g className="radar-sweep">
+        <line x1="200" y1="200" x2="200" y2="42" stroke={Q.secondary} strokeOpacity="0.45" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="200" cy="52" r="4" fill={Q.secondary} fillOpacity="0.7" />
+      </g>
+      <circle cx="200" cy="200" r="80" stroke={Q.secondary} strokeOpacity="0.35" className="radar-ring" />
+      <circle cx="200" cy="200" r="80" stroke={Q.primary} strokeOpacity="0.28" className="radar-ring" style={{ animationDelay: '1.5s' }} />
+      <circle cx="272" cy="140" r="5" fill={Q.tertiary} fillOpacity="0.9" />
+      <circle cx="132" cy="262" r="4" fill={Q.primary} fillOpacity="0.8" />
+      <circle cx="248" cy="286" r="3.5" fill={Q.secondaryFixed} fillOpacity="0.8" />
+    </svg>
+  );
+}
+
+function Nav({ scrolled }: { scrolled: boolean }) {
+  return (
+    <nav
+      className={`fixed top-0 z-50 w-full border-b backdrop-blur-xl transition-all duration-300 ${scrolled ? 'border-white/10 shadow-lg' : 'border-transparent'}`}
+      style={{ backgroundColor: `${Q.bg}${scrolled ? 'F2' : 'CC'}` }}
+    >
+      <div className="mx-auto flex max-w-container-max items-center justify-between px-gutter py-4">
+        <Link to="/" className="flex items-center gap-2 tracking-tight">
+          <span className="material-symbols-outlined text-[28px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+            radar
+          </span>
+          <span className="font-display text-headline-md font-bold">Radar Quito</span>
+        </Link>
+
+        <div className="hidden items-center gap-8 text-label-md md:flex">
+          <a href="#features" className="text-on-surface-variant transition-colors duration-300 hover:text-secondary">Funcionalidades</a>
+          <a href="#how" className="text-on-surface-variant transition-colors duration-300 hover:text-secondary">Como funciona</a>
+          <a href="#stats" className="text-on-surface-variant transition-colors duration-300 hover:text-secondary">Datos</a>
+        </div>
+
+        <Link
+          to="/login"
+          className="flex items-center gap-2 text-label-md text-secondary transition-colors duration-300 hover:text-secondary-fixed"
+        >
+          Iniciar Sesion
+          <span className="material-symbols-outlined text-[20px]">login</span>
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
 export function LandingPage() {
   const lenisRef = useRef<Lenis | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -20,6 +85,7 @@ export function LandingPage() {
     lenisRef.current = lenis;
 
     lenis.on('scroll', ScrollTrigger.update);
+    lenis.on('scroll', ({ scroll }: { scroll: number }) => setScrolled(scroll > 20));
 
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
@@ -34,18 +100,17 @@ export function LandingPage() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Hero entrance
       const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       heroTl
         .from('.hero-badge', { y: 20, opacity: 0, duration: 0.6 })
         .from('.hero-title', { y: 40, opacity: 0, duration: 0.8 }, '-=0.3')
         .from('.hero-subtitle', { y: 30, opacity: 0, duration: 0.7 }, '-=0.5')
         .from('.hero-cta', { y: 20, opacity: 0, duration: 0.5 }, '-=0.4')
-        .from('.hero-visual', { y: 60, opacity: 0, scale: 0.95, duration: 1 }, '-=0.3');
+        .from('.hero-radar', { opacity: 0, scale: 0.85, duration: 1.2 }, '-=0.8');
 
-      // Scroll-triggered animations with fromTo to guarantee visibility
       gsap.utils.toArray<HTMLElement>('.feature-card').forEach((el, i) => {
-        gsap.fromTo(el,
+        gsap.fromTo(
+          el,
           { y: 60, opacity: 0 },
           {
             y: 0, opacity: 1, duration: 0.7, delay: i * 0.1, ease: 'power2.out',
@@ -55,17 +120,19 @@ export function LandingPage() {
       });
 
       gsap.utils.toArray<HTMLElement>('.stat-item').forEach((el, i) => {
-        gsap.fromTo(el,
+        gsap.fromTo(
+          el,
           { y: 40, opacity: 0 },
           {
-            y: 0, opacity: 1, duration: 0.6, delay: i * 0.1, ease: 'power2.out',
+            y: 0, opacity: 1, duration: 0.6, delay: i * 0.08, ease: 'power2.out',
             scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' },
           },
         );
       });
 
       gsap.utils.toArray<HTMLElement>('.step-card').forEach((el, i) => {
-        gsap.fromTo(el,
+        gsap.fromTo(
+          el,
           { y: 50, opacity: 0 },
           {
             y: 0, opacity: 1, duration: 0.6, delay: i * 0.12, ease: 'power2.out',
@@ -74,7 +141,8 @@ export function LandingPage() {
         );
       });
 
-      gsap.fromTo('.cta-block',
+      gsap.fromTo(
+        '.cta-block',
         { y: 50, opacity: 0 },
         {
           y: 0, opacity: 1, duration: 0.8, ease: 'power2.out',
@@ -87,252 +155,199 @@ export function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: QUITO_COLORS.offWhite }}>
-      <Nav />
-      <Hero />
-      <Features />
-      <Stats />
-      <HowItWorks />
-      <CTA />
-      <Footer />
-    </div>
-  );
-}
+    <div className="min-h-screen flex-1" style={{ backgroundColor: Q.bg }}>
+      <Nav scrolled={scrolled} />
 
-function Nav() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md" style={{ backgroundColor: `${QUITO_COLORS.offWhite}E6` }}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg font-bold text-white" style={{ backgroundColor: QUITO_COLORS.terracotta }}>R</div>
-          <span className="text-lg font-semibold" style={{ color: QUITO_COLORS.charcoal }}>Radar Quito</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="px-4 py-2 text-sm font-medium transition-colors hover:opacity-70" style={{ color: QUITO_COLORS.slate }}>Iniciar Sesión</Link>
-          <Link to="/register" className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: QUITO_COLORS.terracotta }}>Registrarse</Link>
-        </div>
-      </div>
-    </nav>
-  );
-}
+      <main className="grow pt-24">
+        {/* Hero */}
+        <section className="relative flex min-h-[82vh] w-full items-center justify-center overflow-hidden px-gutter">
+          <div className="absolute inset-0 z-0">
+            <div
+              className="absolute inset-0 opacity-[0.13]"
+              style={{
+                backgroundImage: `linear-gradient(${Q.secondary}1F 1px, transparent 1px), linear-gradient(90deg, ${Q.secondary}1F 1px, transparent 1px)`,
+                backgroundSize: '48px 48px',
+              }}
+            />
+            <div
+              className="absolute left-1/2 top-1/3 h-[480px] w-[720px] -translate-x-1/2 -translate-y-1/4 rounded-full blur-3xl pulse-glow"
+              style={{ background: `${Q.secondary}12` }}
+            />
+            <div className="hero-radar absolute inset-0">
+              <RadarDecoration />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
+          </div>
 
-function Hero() {
-  return (
-    <section className="relative flex min-h-screen items-center overflow-hidden pt-20">
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `radial-gradient(${QUITO_COLORS.terracotta} 1px, transparent 1px)`,
-        backgroundSize: '32px 32px',
-      }} />
-
-      <div className="relative mx-auto max-w-6xl px-6 py-20">
-        <div className="grid items-center gap-16 lg:grid-cols-2">
-          <div>
-            <div className="hero-badge mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium"
-              style={{ backgroundColor: `${QUITO_COLORS.sage}15`, color: QUITO_COLORS.sageDark, border: `1px solid ${QUITO_COLORS.sage}30` }}>
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: QUITO_COLORS.sage }} />
-              Plataforma Ciudadana
+          <div className="relative z-10 mx-auto mt-10 flex max-w-3xl flex-col items-center gap-6 text-center">
+            <div className="glass-card mb-2 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 hero-badge">
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-secondary" />
+              </span>
+              <span className="font-mono-data text-mono-data uppercase tracking-wider text-secondary-fixed">
+                Sistema Activo
+              </span>
             </div>
 
-            <h1 className="hero-title text-5xl font-bold leading-tight tracking-tight lg:text-6xl" style={{ color: QUITO_COLORS.charcoal }}>
-              Tu voz,{' '}<span style={{ color: QUITO_COLORS.terracotta }}>nuestro radar.</span>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-on-surface hero-title sm:text-display-lg md:text-[64px] md:leading-[72px]">
+              El Pulso de Quito en{' '}
+              <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
+                Tiempo Real
+              </span>
             </h1>
 
-            <p className="hero-subtitle mt-6 max-w-lg text-lg leading-relaxed" style={{ color: QUITO_COLORS.warmGray }}>
-              Reporta incidentes, colabora con tu comunidad y transforma Quito en una ciudad más segura y conectada.
+            <p className="mx-auto mt-2 max-w-2xl text-body-lg text-on-surface-variant hero-subtitle">
+              Descubre incidencias, eventos y el ritmo de tu zona al instante.
+              Navega la ciudad con inteligencia impulsada por datos comunitarios.
             </p>
 
-            <div className="hero-cta mt-8 flex flex-wrap items-center gap-4">
-              <Link to="/register" className="inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:opacity-95"
-                style={{ backgroundColor: QUITO_COLORS.terracotta }}>
-                Comenzar Ahora <Icon name="arrow" className="h-4 w-4" />
+            <div className="mt-6 flex w-full flex-col gap-4 sm:w-auto sm:flex-row hero-cta">
+              <Link
+                to="/map"
+                className="btn-gradient group flex items-center justify-center gap-2 rounded-lg px-8 py-4 text-label-md text-white shadow-lg transition-all"
+                style={{ boxShadow: `0 10px 30px ${Q.primaryContainer}33` }}
+              >
+                Explorar el Mapa
+                <span className="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">
+                  arrow_forward
+                </span>
               </Link>
-              <Link to="/login" className="inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-semibold transition-all hover:opacity-70"
-                style={{ color: QUITO_COLORS.charcoal, border: `1.5px solid ${QUITO_COLORS.stoneDark}` }}>
-                Ya tengo cuenta
+              <a
+                href="#features"
+                className="glass-card flex items-center justify-center gap-2 rounded-lg px-8 py-4 text-label-md text-on-surface transition-colors hover:bg-white/5"
+              >
+                Ver Funcionalidades
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Features bento */}
+        <section id="features" className="relative z-20 mx-auto max-w-container-max px-gutter py-24">
+          <div className="mb-14 text-center">
+            <p className="mb-3 text-label-sm uppercase tracking-[0.2em] text-secondary">Monitoreo ciudadano</p>
+            <h2 className="font-display text-headline-lg text-on-surface">Construido para la ciudad</h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {features.map((f, i) => (
+              <div
+                key={f.title}
+                className={`feature-card glass-card group relative flex cursor-pointer flex-col gap-6 overflow-hidden rounded-xl p-8 transition-colors hover:bg-surface-low ${
+                  i === 1 ? 'md:translate-y-8' : ''
+                }`}
+              >
+                <div
+                  className="absolute -mr-16 -mt-16 right-0 top-0 h-32 w-32 rounded-full blur-3xl transition-opacity group-hover:opacity-100"
+                  style={{ background: `${ACCENTS[f.accent]}1A`, opacity: 0.5 }}
+                />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-surface transition-colors" style={{ borderColor: `${ACCENTS[f.accent]}33` }}>
+                  <span
+                    className="material-symbols-outlined text-[24px]"
+                    style={{ color: ACCENTS[f.accent], fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {f.icon}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="mb-2 font-display text-headline-md text-on-surface">{f.title}</h3>
+                  <p className="text-body-md text-on-surface-variant">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-16 flex flex-col items-center justify-center gap-4 md:flex-row md:gap-12">
+            {secondaryFeatures.map((s) => (
+              <div key={s.label} className="feature-card flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[20px] text-tertiary">{s.icon}</span>
+                <span className="text-label-md text-on-surface-variant">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section id="stats" className="relative z-20 mx-auto max-w-container-max px-gutter pb-24">
+          <div className="glass-card-solid grid grid-cols-2 gap-y-10 rounded-2xl px-6 py-10 md:grid-cols-4">
+            {stats.map((s) => (
+              <div key={s.label} className="stat-item text-center">
+                <p className="font-display text-4xl font-bold text-secondary md:text-5xl">{s.value}</p>
+                <p className="mt-2 text-label-sm uppercase tracking-[0.15em] text-outline">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="how" className="relative z-20 mx-auto max-w-container-max px-gutter pb-24">
+          <div className="mb-14 text-center">
+            <p className="mb-3 text-label-sm uppercase tracking-[0.2em] text-secondary">Simple y colaborativo</p>
+            <h2 className="font-display text-headline-lg text-on-surface">
+              Cuatro pasos para <span className="text-secondary">hacer la diferencia</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((s, i) => (
+              <div key={s.num} className="step-card glass-card relative rounded-xl p-8">
+                <span className="font-mono-data text-mono-data text-secondary" style={{ opacity: 0.9 }}>{s.num}</span>
+                <h3 className="mb-2 mt-4 font-display font-semibold text-on-surface">{s.title}</h3>
+                <p className="text-body-md text-on-surface-variant">{s.desc}</p>
+                {i < steps.length - 1 && (
+                  <span className="material-symbols-outlined absolute -right-5 top-1/2 hidden -translate-y-1/2 text-outline-variant lg:block">
+                    arrow_forward_ios
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="cta-section relative z-20 mx-auto max-w-container-max px-gutter pb-28">
+          <div className="cta-block relative overflow-hidden rounded-2xl p-8 text-center sm:p-12 md:p-16" style={{ background: `linear-gradient(135deg, ${Q.surfaceLow}, ${Q.surface})`, border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full blur-3xl" style={{ background: `${Q.secondary}14` }} />
+            <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full blur-3xl" style={{ background: `${Q.primaryContainer}14` }} />
+            <h2 className="font-display text-headline-lg text-on-surface md:text-[36px] md:leading-[44px]">
+              Se parte del pulso de tu ciudad
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-body-lg text-on-surface-variant">
+              Unete a miles de quiteños que ya estan transformando su ciudad, un reporte a la vez.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link to="/register" className="btn-gradient rounded-lg px-8 py-4 text-label-md text-white shadow-lg">
+                Crear cuenta gratis
+              </Link>
+              <Link to="/map" className="glass-card rounded-lg px-8 py-4 text-label-md text-on-surface transition-colors hover:bg-white/5">
+                Ver el mapa
               </Link>
             </div>
-
-            <div className="mt-10 flex items-center gap-6">
-              <div className="flex -space-x-2">
-                {[QUITO_COLORS.terracotta, QUITO_COLORS.sage, QUITO_COLORS.gold, QUITO_COLORS.slate].map((color, i) => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white" style={{ backgroundColor: color }} />
-                ))}
-              </div>
-              <p className="text-xs" style={{ color: QUITO_COLORS.warmGray }}>
-                <span className="font-semibold" style={{ color: QUITO_COLORS.charcoal }}>8,500+</span> ciudadanos ya reportan
-              </p>
-            </div>
           </div>
+        </section>
+      </main>
 
-          <div className="hero-visual hidden lg:block">
-            <div className="relative overflow-hidden rounded-2xl shadow-2xl" style={{ border: `1px solid ${QUITO_COLORS.stone}` }}>
-              <div className="flex h-80 items-center justify-center" style={{ backgroundColor: '#1a1f2e' }}>
-                <div className="text-center">
-                  <div className="mb-3 flex justify-center gap-2">
-                    {[QUITO_COLORS.terracotta, QUITO_COLORS.sage, QUITO_COLORS.gold, '#E63946', QUITO_COLORS.slate].map((color, i) => (
-                      <div key={i} className="h-4 w-4 rounded-full shadow-lg" style={{
-                        backgroundColor: color,
-                        animation: `pulse 2s ease-in-out ${i * 0.3}s infinite`,
-                      }} />
-                    ))}
-                  </div>
-                  <p className="text-sm font-medium text-white/60">Mapa interactivo de Quito</p>
-                  <p className="mt-1 text-xs text-white/30">12,450 reportes activos</p>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-4 rounded-xl p-4 shadow-xl" style={{ backgroundColor: QUITO_COLORS.offWhite, border: `1px solid ${QUITO_COLORS.stone}` }}>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${QUITO_COLORS.sage}20` }}>
-                    <svg className="h-5 w-5" fill="none" stroke={QUITO_COLORS.sage} viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium" style={{ color: QUITO_COLORS.charcoal }}>Resueltos hoy</p>
-                    <p className="text-lg font-bold" style={{ color: QUITO_COLORS.sage }}>47</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -top-3 -right-3 rounded-xl p-3 shadow-xl" style={{ backgroundColor: QUITO_COLORS.offWhite, border: `1px solid ${QUITO_COLORS.stone}` }}>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: QUITO_COLORS.terracotta, animation: 'pulse 2s infinite' }} />
-                  <span className="text-xs font-medium" style={{ color: QUITO_COLORS.charcoal }}>3 nuevos</span>
-                </div>
-              </div>
-            </div>
+      {/* Footer */}
+      <footer className="mt-auto w-full border-t border-white/5" style={{ backgroundColor: Q.surfaceLowest }}>
+        <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-8 px-10 py-12 md:flex-row">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[22px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              radar
+            </span>
+            <span className="font-display font-bold text-on-surface">Radar Quito</span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-6 text-label-sm text-on-surface-variant">
+            <a href="#features" className="rounded outline-none transition-colors hover:text-primary">Privacidad</a>
+            <a href="#features" className="rounded outline-none transition-colors hover:text-primary">Terminos</a>
+            <a href="#features" className="rounded outline-none transition-colors hover:text-primary">Contacto</a>
+          </div>
+          <div className="text-center text-sm text-tertiary md:text-right">
+            © 2026 Radar Quito. Monitorizacion en tiempo real.
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Features() {
-  return (
-    <section className="py-24">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-16 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: QUITO_COLORS.terracotta }}>Funcionalidades</p>
-          <h2 className="text-3xl font-bold lg:text-4xl" style={{ color: QUITO_COLORS.charcoal }}>
-            Todo lo que necesitas para <span style={{ color: QUITO_COLORS.sage }}>reportar</span>
-          </h2>
-        </div>
-
-        <div className="features-grid grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, i) => (
-            <div key={i} className="feature-card group rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-              style={{ backgroundColor: 'white', border: `1px solid ${QUITO_COLORS.stone}` }}>
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl"
-                style={{ backgroundColor: `${QUITO_COLORS.terracotta}10`, color: QUITO_COLORS.terracotta }}>
-                <Icon name={f.icon} />
-              </div>
-              <h3 className="mb-2 text-base font-semibold" style={{ color: QUITO_COLORS.charcoal }}>{f.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: QUITO_COLORS.warmGray }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Stats() {
-  return (
-    <section className="stats-section py-20" style={{ backgroundColor: QUITO_COLORS.charcoal }}>
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-          {stats.map((s, i) => (
-            <div key={i} className="stat-item text-center">
-              <p className="text-4xl font-bold tracking-tight lg:text-5xl" style={{ color: QUITO_COLORS.gold }}>{s.value}</p>
-              <p className="mt-2 text-sm" style={{ color: '#8A8580' }}>{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorks() {
-  return (
-    <section className="steps-section py-24">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-16 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: QUITO_COLORS.sage }}>Cómo Funciona</p>
-          <h2 className="text-3xl font-bold lg:text-4xl" style={{ color: QUITO_COLORS.charcoal }}>
-            Cuatro pasos para <span style={{ color: QUITO_COLORS.terracotta }}>hacer la diferencia</span>
-          </h2>
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-4">
-          {steps.map((s, i) => (
-            <div key={i} className="step-card relative text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white"
-                style={{ backgroundColor: i === 3 ? QUITO_COLORS.terracotta : QUITO_COLORS.sage }}>
-                {s.num}
-              </div>
-              <h3 className="mb-2 text-base font-semibold" style={{ color: QUITO_COLORS.charcoal }}>{s.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: QUITO_COLORS.warmGray }}>{s.desc}</p>
-              {i < 3 && (
-                <div className="absolute top-7 left-[60%] hidden h-px w-[80%] md:block" style={{ backgroundColor: QUITO_COLORS.stone }} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CTA() {
-  return (
-    <section className="cta-section py-24">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="cta-block overflow-hidden rounded-3xl px-8 py-16 text-center md:px-16"
-          style={{ backgroundColor: QUITO_COLORS.charcoal }}>
-          <h2 className="text-3xl font-bold text-white lg:text-4xl">
-            Únete a los ciudadanos que ya están <span style={{ color: QUITO_COLORS.gold }}>transformando Quito</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-lg text-sm" style={{ color: '#8A8580' }}>
-            Cada reporte cuenta. Cada confirmación importa. Juntos podemos hacer de Quito una ciudad más segura.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link to="/register" className="inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:opacity-95"
-              style={{ backgroundColor: QUITO_COLORS.terracotta }}>
-              Crear Cuenta Gratis <Icon name="arrow" className="h-4 w-4" />
-            </Link>
-            <Link to="/login" className="inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-white transition-all hover:opacity-80"
-              style={{ border: `1.5px solid ${QUITO_COLORS.slate}` }}>
-              Ya tengo cuenta
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="py-12" style={{ borderTop: `1px solid ${QUITO_COLORS.stone}` }}>
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-xs text-white" style={{ backgroundColor: QUITO_COLORS.terracotta }}>R</div>
-            <span className="text-sm font-semibold" style={{ color: QUITO_COLORS.charcoal }}>Radar Quito</span>
-          </div>
-          <p className="text-xs" style={{ color: QUITO_COLORS.warmGray }}>
-            &copy; 2026 Radar Quito. Hecho con propósito para la ciudad.
-          </p>
-          <div className="flex gap-6">
-            <a href="#" className="text-xs transition-colors hover:opacity-70" style={{ color: QUITO_COLORS.slate }}>Privacidad</a>
-            <a href="#" className="text-xs transition-colors hover:opacity-70" style={{ color: QUITO_COLORS.slate }}>Términos</a>
-            <a href="#" className="text-xs transition-colors hover:opacity-70" style={{ color: QUITO_COLORS.slate }}>Contacto</a>
-          </div>
-        </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
   );
 }

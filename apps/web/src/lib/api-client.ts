@@ -24,6 +24,10 @@ class ApiClient {
     localStorage.setItem('refreshToken', refreshToken);
   }
 
+  setTokens(accessToken: string, refreshToken: string) {
+    this.saveTokens(accessToken, refreshToken);
+  }
+
   clearTokens() {
     this.accessToken = null;
     this.refreshToken = null;
@@ -33,6 +37,8 @@ class ApiClient {
 
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { params, ...fetchOptions } = options;
+
+    this.loadTokens();
 
     let url = `${API_BASE_URL}${endpoint}`;
     if (params) {

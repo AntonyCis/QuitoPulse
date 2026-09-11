@@ -57,10 +57,10 @@ export function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gray-100">
+    <div className="h-dvh w-screen overflow-hidden" style={{ backgroundColor: '#0b1326' }}>
       <Header onReportClick={() => setShowCreateReport(true)} />
 
-      <div className="relative h-full w-full pt-14">
+      <div className="relative h-full w-full pt-[56px] sm:pt-[68px]">
         {/* Map */}
         <ReportMap
           reports={reports}
@@ -78,7 +78,14 @@ export function App() {
 
         {/* Report count badge */}
         <div className="absolute bottom-4 left-4 z-10">
-          <div className="rounded-full bg-white/95 px-3 py-1.5 text-sm font-medium text-gray-700 shadow backdrop-blur-sm">
+          <div
+            className="rounded-full border px-3.5 py-1.5 font-mono-data text-mono-data backdrop-blur-xl"
+            style={{
+              backgroundColor: 'rgba(23,31,51,0.8)',
+              borderColor: 'rgba(255,255,255,0.12)',
+              color: '#4cd7f6',
+            }}
+          >
             {reportsData?.total || 0} reportes visibles
           </div>
         </div>

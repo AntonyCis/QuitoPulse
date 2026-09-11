@@ -1,11 +1,186 @@
 @import "tailwindcss";
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+@theme {
+  /* M3 dark navy palette */
+  --color-background: #0b1326;
+  --color-surface-lowest: #060e20;
+  --color-surface-low: #131b2e;
+  --color-surface: #171f33;
+  --color-surface-high: #222a3d;
+  --color-surface-highest: #2d3449;
+  --color-surface-bright: #31394d;
+
+  --color-on-surface: #dae2fd;
+  --color-on-surface-variant: #c7c4d7;
+  --color-outline: #908fa0;
+  --color-outline-variant: #464554;
+
+  --color-primary: #c0c1ff;
+  --color-primary-container: #8083ff;
+  --color-secondary: #4cd7f6;
+  --color-secondary-fixed: #acedff;
+  --color-tertiary: #4edea3;
+
+  /* Typography */
+  --font-display: "Sora", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono-data: "JetBrains Mono", monospace;
+
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 500;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 20px;
+  --text-label-md--letter-spacing: 0.05em;
+  --text-label-md--font-weight: 600;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.08em;
+  --text-label-sm--font-weight: 500;
+
+  --text-mono-data: 14px;
+  --text-mono-data--line-height: 20px;
+  --text-mono-data--font-weight: 500;
+
+  --spacing-gutter: 24px;
+  --spacing-container-max: 1280px;
 }
 
-html.lenis, html.lenis body {
+html {
+  background-color: var(--color-background);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: rgb(76 215 246 / 0.3);
+  color: var(--color-secondary-fixed);
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  user-select: none;
+}
+
+/* Glass card */
+.glass-card {
+  background: rgb(23 31 51 / 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.glass-card-solid {
+  background: rgb(19 27 46 / 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+}
+
+/* Gradient button (indigo) */
+.btn-gradient {
+  background: linear-gradient(135deg, #494bd6 0%, #8083ff 100%);
+}
+
+.btn-gradient:hover {
+  opacity: 0.9;
+}
+
+/* Cyan glow */
+.pulse-glow {
+  box-shadow: 0 0 20px rgb(76 215 246 / 0.15);
+}
+
+/* Radar rings hero decoration */
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar-sweep {
+  animation: radar-sweep 6s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes radar-ring {
+  0% { transform: scale(0.35); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.radar-ring {
+  animation: radar-ring 3s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+/* MapLibre dark popups */
+.maplibregl-popup-content {
+  background: var(--color-surface-high) !important;
+  color: var(--color-on-surface) !important;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.45) !important;
+  font-family: var(--font-sans) !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: var(--color-surface-high) !important;
+  border-bottom-color: var(--color-surface-high) !important;
+}
+
+.maplibregl-popup-close-button {
+  color: var(--color-on-surface-variant) !important;
+  padding: 2px 6px !important;
+  font-size: 18px !important;
+}
+
+.maplibregl-popup-close-button:hover {
+  background: rgb(255 255 255 / 0.08) !important;
+  border-radius: 6px;
+}
+
+/* MapLibre controls dark */
+.maplibregl-ctrl-group {
+  background: var(--color-surface-high) !important;
+  border: 1px solid rgb(255 255 255 / 0.12) !important;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid rgb(255 255 255 / 0.08) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
   height: auto;
 }
 

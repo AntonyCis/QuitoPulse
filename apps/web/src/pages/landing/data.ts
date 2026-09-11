@@ -5,34 +5,28 @@ export const QUITO_COLORS = Q;
 export const features = [
   {
     icon: 'map',
-    title: 'Mapa en Tiempo Real',
-    desc: 'Visualiza incidentes geolocalizados en un mapa interactivo de Quito. Navega por zonas, filtra por categoría y descubre lo que sucede en tu ciudad.',
+    accent: 'secondary' as const,
+    title: 'Mapa en Vivo',
+    desc: 'Visualiza el estado de la ciudad con datos filtrados y precisos al momento, diseñados para una lectura rápida sin saturación visual.',
   },
   {
-    icon: 'shield',
-    title: 'Moderación Activa',
-    desc: 'Cada reporte pasa por un proceso de verificación. Nuestros moderadores revisan y validan la información antes de que se publique.',
+    icon: 'notifications_active',
+    accent: 'primary' as const,
+    title: 'Alertas Inteligentes',
+    desc: 'Recibe notificaciones focalizadas de eventos críticos en tu radar personal, manteniendo el control de tu entorno.',
   },
   {
-    icon: 'check',
-    title: 'Verificación Social',
-    desc: 'La comunidad confirma y comenta los reportes. Más confirmaciones significan mayor prioridad y atención de las autoridades.',
+    icon: 'groups',
+    accent: 'tertiary' as const,
+    title: 'Comunidad Activa',
+    desc: 'Reportes validados por usuarios en la zona aseguran que la información sea relevante, actual y confiable.',
   },
-  {
-    icon: 'bell',
-    title: 'Notificaciones Push',
-    desc: 'Recibe alertas cuando un reporte en tu zona cambia de estado. Mantente informado sin revisar la app constantemente.',
-  },
-  {
-    icon: 'chart',
-    title: 'Estadísticas Públicas',
-    desc: 'Accede a datos agregados sobre incidentes por zona, categoría y tendencias temporales. Información que impulsa mejores decisiones.',
-  },
-  {
-    icon: 'lock',
-    title: 'Datos Seguros',
-    desc: 'Tus reportes son anónimos por defecto. La plataforma cumple con estándares de seguridad y privacidad de datos.',
-  },
+];
+
+export const secondaryFeatures = [
+  { icon: 'verified', label: 'Moderación activa de cada reporte' },
+  { icon: 'query_stats', label: 'Estadísticas públicas por zona y categoría' },
+  { icon: 'lock', label: 'Privacidad primero: tus datos protegidos' },
 ];
 
 export const stats = [

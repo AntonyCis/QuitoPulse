@@ -37,7 +37,7 @@ const reportPriorityEnum = z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']);
 export const createReportSchema = z.object({
   title: z.string().min(3, 'El título debe tener al menos 3 caracteres').max(200),
   description: z.string().min(10, 'La descripción debe tener al menos 10 caracteres').max(2000),
-  category: reportCategoryEnum,
+  categoryId: z.string().uuid('Categoría inválida'),
   priority: reportPriorityEnum.default('MEDIUM'),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
@@ -50,7 +50,7 @@ export type CreateReportInput = z.infer<typeof createReportSchema>;
 export const updateReportSchema = z.object({
   title: z.string().min(3).max(200).optional(),
   description: z.string().min(10).max(2000).optional(),
-  category: reportCategoryEnum.optional(),
+  categoryId: z.string().uuid('Categoría inválida').optional(),
   priority: reportPriorityEnum.optional(),
   address: z.string().max(500).optional(),
 });
